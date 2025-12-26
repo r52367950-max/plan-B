@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-// ============== 类型定义 ==============
 type Priority = "must" | "should" | "could" | "wont";
 type TaskStatus = "pending" | "in-progress" | "completed";
 
@@ -29,10 +28,9 @@ interface KPI {
   unit: string;
 }
 
-// ============== 初始数据 ==============
 const initialTasks: Task[] = [
   { id: "1", title: "完成2套数学卷并做错题闭环", priority: "must", status: "in-progress", hours: 4 },
-  { id: "2", title: "写作2篇英语议论文（初稿+修改稿）", priority: "must", status: "pending", hours: 3 },
+  { id: "2", title: "写作2篇英语议论文", priority: "must", status: "pending", hours: 3 },
   { id: "3", title: "语料库新增20句并复用到一篇作文", priority: "must", status: "pending", hours: 1.5 },
   { id: "4", title: "历史专题框架整理", priority: "should", status: "pending", hours: 2 },
   { id: "5", title: "政治时政热点收集与分析", priority: "should", status: "completed", hours: 1 },
@@ -43,7 +41,7 @@ const initialObjectives: Objective[] = [
   {
     id: "1",
     title: "英语写作能力跃迁",
-    description: "从"能写"升级为"能稳定高分写"",
+    description: "从能写升级为能稳定高分写",
     progress: 45,
     keyResults: [
       { id: "kr1", title: "完成12篇议论文", current: 5, target: 12 },
@@ -70,18 +68,15 @@ const initialKPIs: KPI[] = [
   { id: "4", name: "睡眠达标率", current: 71, target: 85, unit: "%" },
   { id: "5", name: "深度工作块", current: 15, target: 20, unit: "块/周" },
 ];
-// ============== 工具函数 ==============
+
 const cn = (...classes: (string | boolean | undefined)[]) => classes.filter(Boolean).join(" ");
 
-// ============== 组件 ==============
-
-// 进度条
 function Progress({ value, max = 100, size = "md" }: { value: number; max?: number; size?: "sm" | "md" }) {
   const percentage = Math.min((value / max) * 100, 100);
   return (
-    <div className={cn("w-full bg-gray-100 rounded-full overflow-hidden", size === "sm" ? "h-1.5" : "h-2.5")}>
+    <div style={{ width: "100%", backgroundColor: "#f3f4f6", borderRadius: "9999px", overflow: "hidden", height: size === "sm" ? "6px" : "10px" }}>
       <motion.div
-        className="h-full bg-gradient-to-r from-[#0047AB] to-[#2a4fff] rounded-full"
+        style={{ height: "100%", background: "linear-gradient(to right, #0047AB, #2a4fff)", borderRadius: "9999px" }}
         initial={{ width: 0 }}
         animate={{ width: `${percentage}%` }}
         transition={{ duration: 0.8 }}
@@ -90,7 +85,6 @@ function Progress({ value, max = 100, size = "md" }: { value: number; max?: numb
   );
 }
 
-// 圆形进度
 function CircularProgress({ value, size = 80 }: { value: number; size?: number }) {
   const strokeWidth = 6;
   const radius = (size - strokeWidth) / 2;
@@ -98,8 +92,8 @@ function CircularProgress({ value, size = 80 }: { value: number; size?: number }
   const offset = circumference - (value / 100) * circumference;
 
   return (
-    <div className="relative" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="-rotate-90">
+    <div style={{ position: "relative", width: size, height: size }}>
+      <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
         <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#e5e7eb" strokeWidth={strokeWidth} />
         <motion.circle
           cx={size / 2}
@@ -115,135 +109,136 @@ function CircularProgress({ value, size = 80 }: { value: number; size?: number }
           style={{ strokeDasharray: circumference }}
         />
       </svg>
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-lg font-bold text-gray-900">{value}%</span>
+      <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <span style={{ fontSize: "18px", fontWeight: "bold", color: "#111827" }}>{value}%</span>
       </div>
     </div>
   );
 }
 
-// 优先级标签
 function PriorityBadge({ priority }: { priority: Priority }) {
-  const styles: Record<Priority, string> = {
-    must: "bg-red-100 text-red-700",
-    should: "bg-amber-100 text-amber-700",
-    could: "bg-blue-100 text-blue-700",
-    wont: "bg-gray-100 text-gray-500",
+  const styles: Record<Priority, { bg: string; color: string }> = {
+    must: { bg: "#fee2e2", color: "#b91c1c" },
+    should: { bg: "#fef3c7", color: "#b45309" },
+    could: { bg: "#dbeafe", color: "#1d4ed8" },
+    wont: { bg: "#f3f4f6", color: "#6b7280" },
   };
-  const labels: Record<Priority, string> = { must: "Must", should: "Should", could: "Could", wont: "Won't" };
-  return <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium", styles[priority])}>{labels[priority]}</span>;
+  const labels: Record<Priority, string> = { must: "Must", should: "Should", could: "Could", wont: "Wont" };
+  return (
+    <span style={{ padding: "2px 8px", borderRadius: "9999px", fontSize: "12px", fontWeight: 500, backgroundColor: styles[priority].bg, color: styles[priority].color }}>
+      {labels[priority]}
+    </span>
+  );
 }
 
-// 卡片
-function Card({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn("bg-white rounded-2xl p-6 shadow-sm border border-gray-100", className)}>{children}</div>;
+function Card({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
+  return (
+    <div style={{ backgroundColor: "white", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", border: "1px solid #f3f4f6", ...style }}>
+      {children}
+    </div>
+  );
 }
 
-// 统计卡片
 function StatCard({ title, value, subtitle, icon }: { title: string; value: string | number; subtitle?: string; icon: string }) {
   return (
-    <Card className="hover:shadow-md transition-shadow">
-      <div className="flex items-start justify-between">
+    <Card>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div>
-          <p className="text-sm text-gray-500">{title}</p>
-          <motion.p className="text-3xl font-bold text-gray-900 mt-1" initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }}>
+          <p style={{ fontSize: "14px", color: "#6b7280", margin: 0 }}>{title}</p>
+          <motion.p style={{ fontSize: "30px", fontWeight: "bold", color: "#111827", margin: "4px 0" }} initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }}>
             {value}
           </motion.p>
-          {subtitle && <p className="text-sm text-gray-400 mt-1">{subtitle}</p>}
+          {subtitle && <p style={{ fontSize: "14px", color: "#9ca3af", margin: 0 }}>{subtitle}</p>}
         </div>
-        <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-2xl">{icon}</div>
+        <div style={{ width: "48px", height: "48px", borderRadius: "12px", backgroundColor: "#eff6ff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px" }}>
+          {icon}
+        </div>
       </div>
     </Card>
   );
 }
-// ============== 页面组件 ==============
 
-// Dashboard 页面
 function Dashboard({ tasks, objectives, kpis, onToggleTask }: { tasks: Task[]; objectives: Objective[]; kpis: KPI[]; onToggleTask: (id: string) => void }) {
   const completedTasks = tasks.filter((t) => t.status === "completed").length;
   const completionRate = tasks.length ? Math.round((completedTasks / tasks.length) * 100) : 0;
   const mustTasks = tasks.filter((t) => t.priority === "must");
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "16px" }}>
         <StatCard title="完成率" value={`${completionRate}%`} subtitle="本周任务" icon="✅" />
         <StatCard title="进行中目标" value={objectives.length} subtitle="个 OKR" icon="🎯" />
         <StatCard title="健康指数" value="75%" subtitle="系统状态" icon="💚" />
         <StatCard title="Must 任务" value={`${mustTasks.filter((t) => t.status === "completed").length}/${mustTasks.length}`} subtitle="已完成" icon="🔥" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <Card>
-            <h3 className="text-lg font-semibold mb-4">📎 目标与关键结果</h3>
-            <div className="space-y-4">
-              {objectives.map((obj, idx) => (
-                <motion.div key={obj.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }} className="p-4 rounded-xl bg-gray-50">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono bg-blue-100 text-blue-700 px-2 py-0.5 rounded">O{idx + 1}</span>
-                        <h4 className="font-semibold">{obj.title}</h4>
-                      </div>
-                      <p className="text-sm text-gray-500 mt-1">{obj.description}</p>
+      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "24px" }}>
+        <Card>
+          <h3 style={{ fontSize: "18px", fontWeight: 600, marginBottom: "16px" }}>📎 目标与关键结果</h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            {objectives.map((obj, idx) => (
+              <motion.div key={obj.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }} style={{ padding: "16px", borderRadius: "12px", backgroundColor: "#f9fafb" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <span style={{ fontSize: "12px", fontFamily: "monospace", backgroundColor: "#dbeafe", color: "#1d4ed8", padding: "2px 8px", borderRadius: "4px" }}>O{idx + 1}</span>
+                      <h4 style={{ fontWeight: 600, margin: 0 }}>{obj.title}</h4>
                     </div>
-                    <CircularProgress value={obj.progress} size={60} />
+                    <p style={{ fontSize: "14px", color: "#6b7280", marginTop: "4px" }}>{obj.description}</p>
                   </div>
-                  <div className="space-y-2">
-                    {obj.keyResults.map((kr, krIdx) => (
-                      <div key={kr.id} className="flex items-center gap-2 text-sm">
-                        <span className="text-xs text-gray-400 w-8">KR{krIdx + 1}</span>
-                        <div className="flex-1">
-                          <div className="flex justify-between mb-1">
-                            <span className="text-gray-700 truncate">{kr.title}</span>
-                            <span className="text-gray-500 text-xs">{kr.current}/{kr.target}</span>
-                          </div>
-                          <Progress value={kr.current} max={kr.target} size="sm" />
+                  <CircularProgress value={obj.progress} size={60} />
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  {obj.keyResults.map((kr, krIdx) => (
+                    <div key={kr.id} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "14px" }}>
+                      <span style={{ fontSize: "12px", color: "#9ca3af", width: "32px" }}>KR{krIdx + 1}</span>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
+                          <span style={{ color: "#374151" }}>{kr.title}</span>
+                          <span style={{ color: "#6b7280", fontSize: "12px" }}>{kr.current}/{kr.target}</span>
                         </div>
+                        <Progress value={kr.current} max={kr.target} size="sm" />
                       </div>
-                    ))}
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </Card>
-        </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </Card>
 
-        <div>
-          <Card>
-            <h3 className="text-lg font-semibold mb-4">📊 KPI 看板</h3>
-            <div className="space-y-4">
-              {kpis.map((kpi, idx) => (
-                <motion.div key={kpi.id} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.1 }}>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-sm font-medium text-gray-700">{kpi.name}</span>
-                    <span className="text-sm text-gray-500">{kpi.current}/{kpi.target} {kpi.unit}</span>
-                  </div>
-                  <Progress value={kpi.current} max={kpi.target} size="sm" />
-                </motion.div>
-              ))}
-            </div>
-          </Card>
-        </div>
+        <Card>
+          <h3 style={{ fontSize: "18px", fontWeight: 600, marginBottom: "16px" }}>📊 KPI 看板</h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            {kpis.map((kpi, idx) => (
+              <motion.div key={kpi.id} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.1 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
+                  <span style={{ fontSize: "14px", fontWeight: 500, color: "#374151" }}>{kpi.name}</span>
+                  <span style={{ fontSize: "14px", color: "#6b7280" }}>{kpi.current}/{kpi.target}</span>
+                </div>
+                <Progress value={kpi.current} max={kpi.target} size="sm" />
+              </motion.div>
+            ))}
+          </div>
+        </Card>
       </div>
 
       <Card>
-        <h3 className="text-lg font-semibold mb-4">✅ 本周任务</h3>
-        <div className="space-y-2">
+        <h3 style={{ fontSize: "18px", fontWeight: 600, marginBottom: "16px" }}>✅ 本周任务</h3>
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
           {tasks.map((task, idx) => (
-            <motion.div key={task.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group">
+            <motion.div key={task.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px", borderRadius: "12px", cursor: "pointer" }}>
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => onToggleTask(task.id)}
-                className={cn("w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all", task.status === "completed" ? "bg-emerald-500 border-emerald-500" : "border-gray-300 group-hover:border-blue-400")}
+                style={{ width: "20px", height: "20px", borderRadius: "50%", border: task.status === "completed" ? "none" : "2px solid #d1d5db", backgroundColor: task.status === "completed" ? "#10b981" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
               >
-                {task.status === "completed" && <span className="text-white text-xs">✓</span>}
+                {task.status === "completed" && <span style={{ color: "white", fontSize: "12px" }}>✓</span>}
               </motion.button>
-              <span className={cn("flex-1 text-sm", task.status === "completed" && "text-gray-400 line-through")}>{task.title}</span>
+              <span style={{ flex: 1, fontSize: "14px", color: task.status === "completed" ? "#9ca3af" : "#374151", textDecoration: task.status === "completed" ? "line-through" : "none" }}>{task.title}</span>
               <PriorityBadge priority={task.priority} />
-              {task.hours && <span className="text-xs text-gray-400">⏱ {task.hours}h</span>}
+              {task.hours && <span style={{ fontSize: "12px", color: "#9ca3af" }}>⏱ {task.hours}h</span>}
             </motion.div>
           ))}
         </div>
@@ -251,10 +246,10 @@ function Dashboard({ tasks, objectives, kpis, onToggleTask }: { tasks: Task[]; o
     </div>
   );
 }
-// 计划结构页面
+
 function Structure() {
   const cycles = [
-    { name: "周度冲刺", duration: "45-60分钟", outputs: ["周 OKR、周计划", "风险清单", "周复盘结论"] },
+    { name: "周度冲刺", duration: "45-60分钟", outputs: ["周OKR、周计划", "风险清单", "周复盘结论"] },
     { name: "月度业务回顾", duration: "90分钟", outputs: ["月度复盘报告", "指标看板更新", "下月策略调整"] },
     { name: "阶段里程碑", duration: "120分钟", outputs: ["里程碑验收", "关键路径调整", "资源再配置"] },
     { name: "学期战略复盘", duration: "2-3小时", outputs: ["学期OKR结案", "能力资产沉淀", "下学期战略草案"] },
@@ -265,23 +260,23 @@ function Structure() {
     { name: "OKR", desc: "管理跃迁与结果", use: "需要产出可验证的成果" },
     { name: "KPI", desc: "管理系统健康与稳定", use: "需要长期保持稳定" },
     { name: "MoSCoW", desc: "优先级分类框架", use: "每周任务排布" },
-    { name: "5R复盘", desc: "Result→Review→Reason→Rule→Renew", use: "周/月/学期复盘" },
+    { name: "5R复盘", desc: "Result-Review-Reason-Rule-Renew", use: "周/月/学期复盘" },
   ];
 
   return (
-    <div className="space-y-6">
+    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
       <Card>
-        <h3 className="text-lg font-semibold mb-4">📅 五周期会议制</h3>
-        <div className="space-y-3">
+        <h3 style={{ fontSize: "18px", fontWeight: 600, marginBottom: "16px" }}>📅 五周期会议制</h3>
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
           {cycles.map((cycle, idx) => (
-            <motion.div key={cycle.name} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.1 }} className="p-4 rounded-xl bg-gradient-to-r from-blue-50 to-white border border-blue-100">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-semibold text-[#0047AB]">{cycle.name}</h4>
-                <span className="text-sm text-gray-500">⏱ {cycle.duration}</span>
+            <motion.div key={cycle.name} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.1 }} style={{ padding: "16px", borderRadius: "12px", background: "linear-gradient(to right, #eff6ff, white)", border: "1px solid #dbeafe" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                <h4 style={{ fontWeight: 600, color: "#0047AB", margin: 0 }}>{cycle.name}</h4>
+                <span style={{ fontSize: "14px", color: "#6b7280" }}>⏱ {cycle.duration}</span>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                 {cycle.outputs.map((output) => (
-                  <span key={output} className="text-xs px-2 py-1 bg-white rounded-full text-gray-600 border">{output}</span>
+                  <span key={output} style={{ fontSize: "12px", padding: "4px 8px", backgroundColor: "white", borderRadius: "9999px", color: "#4b5563", border: "1px solid #e5e7eb" }}>{output}</span>
                 ))}
               </div>
             </motion.div>
@@ -290,35 +285,34 @@ function Structure() {
       </Card>
 
       <Card>
-        <h3 className="text-lg font-semibold mb-4">🧰 方法论组合</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <h3 style={{ fontSize: "18px", fontWeight: 600, marginBottom: "16px" }}>🧰 方法论组合</h3>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px" }}>
           {methods.map((method, idx) => (
-            <motion.div key={method.name} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }} whileHover={{ scale: 1.02 }} className="p-4 rounded-xl border border-gray-200 hover:border-blue-200 hover:shadow-md transition-all cursor-pointer">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">{method.name}</span>
+            <motion.div key={method.name} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }} whileHover={{ scale: 1.02 }} style={{ padding: "16px", borderRadius: "12px", border: "1px solid #e5e7eb", cursor: "pointer" }}>
+              <div style={{ marginBottom: "8px" }}>
+                <span style={{ padding: "2px 8px", backgroundColor: "#dbeafe", color: "#1d4ed8", borderRadius: "9999px", fontSize: "12px", fontWeight: 500 }}>{method.name}</span>
               </div>
-              <p className="text-sm text-gray-600 mb-2">{method.desc}</p>
-              <p className="text-xs text-gray-400">适用：{method.use}</p>
+              <p style={{ fontSize: "14px", color: "#4b5563", marginBottom: "8px" }}>{method.desc}</p>
+              <p style={{ fontSize: "12px", color: "#9ca3af" }}>适用：{method.use}</p>
             </motion.div>
           ))}
         </div>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="border-l-4 border-l-[#0047AB]">
-          <h4 className="font-semibold text-gray-900 mb-2">📌 MVD</h4>
-          <p className="text-sm text-gray-600">Minimum Viable Deliverable - 最小可验收交付物。本周期内必须产出的最小可验收成果。</p>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+        <Card style={{ borderLeft: "4px solid #0047AB" }}>
+          <h4 style={{ fontWeight: 600, marginBottom: "8px" }}>📌 MVD</h4>
+          <p style={{ fontSize: "14px", color: "#4b5563" }}>Minimum Viable Deliverable - 最小可验收交付物。本周期内必须产出的最小可验收成果。</p>
         </Card>
-        <Card className="border-l-4 border-l-emerald-500">
-          <h4 className="font-semibold text-gray-900 mb-2">✅ DoD</h4>
-          <p className="text-sm text-gray-600">Definition of Done - 验收条件清单。写清"做到什么程度才算完成"。</p>
+        <Card style={{ borderLeft: "4px solid #10b981" }}>
+          <h4 style={{ fontWeight: 600, marginBottom: "8px" }}>✅ DoD</h4>
+          <p style={{ fontSize: "14px", color: "#4b5563" }}>Definition of Done - 验收条件清单。写清做到什么程度才算完成。</p>
         </Card>
       </div>
     </div>
   );
 }
 
-// 复盘页面
 function Analytics({ tasks, kpis }: { tasks: Task[]; kpis: KPI[] }) {
   const completedTasks = tasks.filter((t) => t.status === "completed").length;
   const completionRate = tasks.length ? Math.round((completedTasks / tasks.length) * 100) : 0;
@@ -332,34 +326,32 @@ function Analytics({ tasks, kpis }: { tasks: Task[]; kpis: KPI[] }) {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4">
+    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
         <Card>
-          <p className="text-sm text-gray-500">完成率</p>
-          <div className="flex items-center gap-4 mt-2">
-            <CircularProgress value={completionRate} />
-          </div>
+          <p style={{ fontSize: "14px", color: "#6b7280", marginBottom: "8px" }}>完成率</p>
+          <CircularProgress value={completionRate} />
         </Card>
         <Card>
-          <p className="text-sm text-gray-500">任务分布</p>
-          <div className="mt-2 space-y-1">
-            <div className="flex items-center gap-2 text-sm"><div className="w-3 h-3 rounded-full bg-emerald-500" /><span>已完成: {completedTasks}</span></div>
-            <div className="flex items-center gap-2 text-sm"><div className="w-3 h-3 rounded-full bg-blue-500" /><span>进行中: {tasks.filter((t) => t.status === "in-progress").length}</span></div>
-            <div className="flex items-center gap-2 text-sm"><div className="w-3 h-3 rounded-full bg-gray-300" /><span>待处理: {tasks.filter((t) => t.status === "pending").length}</span></div>
+          <p style={{ fontSize: "14px", color: "#6b7280", marginBottom: "8px" }}>任务分布</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "14px" }}><div style={{ width: "12px", height: "12px", borderRadius: "50%", backgroundColor: "#10b981" }} /><span>已完成: {completedTasks}</span></div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "14px" }}><div style={{ width: "12px", height: "12px", borderRadius: "50%", backgroundColor: "#3b82f6" }} /><span>进行中: {tasks.filter((t) => t.status === "in-progress").length}</span></div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "14px" }}><div style={{ width: "12px", height: "12px", borderRadius: "50%", backgroundColor: "#d1d5db" }} /><span>待处理: {tasks.filter((t) => t.status === "pending").length}</span></div>
           </div>
         </Card>
       </div>
 
       <Card>
-        <h3 className="text-lg font-semibold mb-4">💡 复盘提问清单</h3>
-        <div className="space-y-4">
+        <h3 style={{ fontSize: "18px", fontWeight: 600, marginBottom: "16px" }}>💡 复盘提问清单</h3>
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           {questions.map((q, idx) => (
-            <motion.div key={idx} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.1 }} className="p-4 rounded-xl bg-gray-50">
-              <div className="flex items-start gap-3">
-                <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-medium flex-shrink-0">{idx + 1}</span>
-                <div className="flex-1">
-                  <p className="font-medium text-gray-800 mb-2">{q}</p>
-                  <textarea placeholder="在此输入你的思考..." className="w-full px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-400 resize-none" rows={2} />
+            <motion.div key={idx} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.1 }} style={{ padding: "16px", borderRadius: "12px", backgroundColor: "#f9fafb" }}>
+              <div style={{ display: "flex", gap: "12px" }}>
+                <span style={{ width: "24px", height: "24px", borderRadius: "50%", backgroundColor: "#dbeafe", color: "#1d4ed8", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "14px", fontWeight: 500, flexShrink: 0 }}>{idx + 1}</span>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontWeight: 500, color: "#1f2937", marginBottom: "8px" }}>{q}</p>
+                  <textarea placeholder="在此输入你的思考..." style={{ width: "100%", padding: "8px 12px", fontSize: "14px", backgroundColor: "white", border: "1px solid #e5e7eb", borderRadius: "8px", resize: "none", outline: "none" }} rows={2} />
                 </div>
               </div>
             </motion.div>
@@ -370,7 +362,6 @@ function Analytics({ tasks, kpis }: { tasks: Task[]; kpis: KPI[] }) {
   );
 }
 
-// ============== 主应用 ==============
 export default function App() {
   const [page, setPage] = useState<"dashboard" | "structure" | "analytics">("dashboard");
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
@@ -386,28 +377,28 @@ export default function App() {
   ] as const;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="fixed top-0 left-0 right-0 h-14 bg-white/90 backdrop-blur-md border-b border-gray-100 z-50">
-        <div className="h-full max-w-5xl mx-auto px-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#0047AB] to-[#2a4fff] flex items-center justify-center">
-              <span className="text-white text-sm">🧭</span>
+    <div style={{ minHeight: "100vh", backgroundColor: "#f9fafb" }}>
+      <nav style={{ position: "fixed", top: 0, left: 0, right: 0, height: "56px", backgroundColor: "rgba(255,255,255,0.9)", backdropFilter: "blur(8px)", borderBottom: "1px solid #f3f4f6", zIndex: 50 }}>
+        <div style={{ height: "100%", maxWidth: "1024px", margin: "0 auto", padding: "0 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <div style={{ width: "32px", height: "32px", borderRadius: "8px", background: "linear-gradient(135deg, #0047AB, #2a4fff)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ color: "white", fontSize: "14px" }}>🧭</span>
             </div>
-            <span className="font-semibold text-gray-900">战略计划</span>
+            <span style={{ fontWeight: 600, color: "#111827" }}>战略计划</span>
           </div>
-          <div className="flex items-center gap-1 p-1 bg-gray-100 rounded-xl">
+          <div style={{ display: "flex", alignItems: "center", gap: "4px", padding: "4px", backgroundColor: "#f3f4f6", borderRadius: "12px" }}>
             {navItems.map((item) => (
-              <motion.button key={item.id} whileTap={{ scale: 0.98 }} onClick={() => setPage(item.id)} className={cn("px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1", page === item.id ? "bg-white text-[#0047AB] shadow-sm" : "text-gray-600")}>
+              <motion.button key={item.id} whileTap={{ scale: 0.98 }} onClick={() => setPage(item.id)} style={{ padding: "6px 12px", borderRadius: "8px", fontSize: "14px", fontWeight: 500, display: "flex", alignItems: "center", gap: "4px", border: "none", cursor: "pointer", backgroundColor: page === item.id ? "white" : "transparent", color: page === item.id ? "#0047AB" : "#4b5563", boxShadow: page === item.id ? "0 1px 2px rgba(0,0,0,0.05)" : "none" }}>
                 <span>{item.icon}</span>
-                <span className="hidden sm:inline">{item.label}</span>
+                <span>{item.label}</span>
               </motion.button>
             ))}
           </div>
         </div>
       </nav>
 
-      <main className="pt-14 pb-8">
-        <div className="max-w-5xl mx-auto px-4 py-6">
+      <main style={{ paddingTop: "56px", paddingBottom: "32px" }}>
+        <div style={{ maxWidth: "1024px", margin: "0 auto", padding: "24px 16px" }}>
           <AnimatePresence mode="wait">
             <motion.div key={page} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.2 }}>
               {page === "dashboard" && <Dashboard tasks={tasks} objectives={initialObjectives} kpis={initialKPIs} onToggleTask={toggleTask} />}
@@ -418,8 +409,8 @@ export default function App() {
         </div>
       </main>
 
-      <footer className="bg-white border-t border-gray-100 py-4">
-        <div className="max-w-5xl mx-auto px-4 text-center text-sm text-gray-500">
+      <footer style={{ backgroundColor: "white", borderTop: "1px solid #f3f4f6", padding: "16px" }}>
+        <div style={{ maxWidth: "1024px", margin: "0 auto", textAlign: "center", fontSize: "14px", color: "#6b7280" }}>
           战略计划系统 | 五周期管理：周度 · 月度 · 半学期 · 学期 · 年度
         </div>
       </footer>
